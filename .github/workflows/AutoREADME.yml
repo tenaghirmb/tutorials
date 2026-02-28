@@ -1,0 +1,25 @@
+name: README Automation
+run-name: ${{ github.actor }} is generating README 🚀
+on: [push]
+jobs:
+  Generate-README:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate README
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: |
+          rm -f README.md
+          echo "# Table of Contents" > README.md
+          for file in *; do
+              if [[ -f "$file" && ! "$file" =~ ^(README\.md|LICENSE|\.) ]]; then
+                  FILE_PATH="$file"
+                  LAST_COMMIT_MSG=$(git log -1 --pretty=%B -- "$FILE_PATH")
+                  echo -e "[$file]($file): $LAST_COMMIT_MSG\n" >> README.md
+              fi
+          done
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Auto generate README
